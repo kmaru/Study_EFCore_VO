@@ -70,6 +70,8 @@ using System.Numerics;
 
 {{(ns is null ? "" : "namespace " + ns + ";")}}
 
+
+[System.ComponentModel.TypeConverter(typeof({{typeSymbol.Name}}TypeConverter))]
 partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{ string.Join(", ", implements) }} 
 {
     private readonly {{targetTypeFullName}} _value;
@@ -101,6 +103,73 @@ partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{ strin
         Validate(value, messages);
         if (messages.Any()) throw new ArgumentException(string.Join("¥n", messages));
         return new(value);
+    }
+
+    private class {{typeSymbol.Name}}TypeConverter: System.ComponentModel.TypeConverter
+    {
+        private static readonly Type StronglyType = typeof({{typeSymbol.Name}});
+        private static readonly Type AtomicType = typeof({{targetTypeFullName}});
+        private static readonly System.ComponentModel.TypeConverter AtomicTypeConverter = System.ComponentModel.TypeDescriptor.GetConverter(AtomicType);
+
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, Type sourceType)
+        {
+            if (sourceType == StronglyType || sourceType == AtomicType)
+            {
+                return true;
+            }
+            var atomicConverterResult = AtomicTypeConverter.CanConvertFrom(context, sourceType);
+            return atomicConverterResult || base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object value)
+        {
+            if (value != null)
+            {
+                if (value is {{typeSymbol.Name}} result1) return result1;
+                if (value is {{targetTypeFullName}} result2) return {{typeSymbol.Name}}.Create(result2);
+                if (AtomicTypeConverter.CanConvertFrom(context, value.GetType()))
+                {
+                    var convertedValue = AtomicTypeConverter.ConvertFrom(context, culture, value);
+                    if(convertedValue is {{targetTypeFullName}} cv)
+                    {
+                        return {{typeSymbol.Name}}.Create(cv);
+                    }
+                }
+            }
+            return base.ConvertFrom(context, culture, value);
+        }
+
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext? context, Type destinationType)
+        {
+            if (destinationType == StronglyType || destinationType == AtomicType)
+            {
+                return true;
+            }
+            var atomicConverterResult = AtomicTypeConverter.CanConvertTo(context, destinationType);
+            return atomicConverterResult || base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object? value, Type destinationType)
+        {
+            if (value is {{typeSymbol.Name}} typedValue)
+            {
+                if (destinationType == StronglyType)
+                {
+                    return typedValue;
+                }
+
+                if (destinationType == AtomicType)
+                {
+                    return typedValue._value;
+                }
+
+                if(AtomicTypeConverter.CanConvertTo(context, destinationType))
+                {
+                    return AtomicTypeConverter.ConvertTo(context, culture, typedValue._value, destinationType);
+                }
+            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
 }
 """;
