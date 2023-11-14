@@ -1,0 +1,1 @@
+EF Core と ValueObject の連携の習作。ValueObject は SourceGenerator で作ってみた。
