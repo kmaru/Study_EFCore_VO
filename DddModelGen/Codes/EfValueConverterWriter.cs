@@ -1,10 +1,10 @@
-﻿namespace DddModelGen.Codes
+﻿namespace DddModelGen.Codes;
+
+internal static class EfValueConverterWriter
 {
-    internal static class EfValueConverterWriter
+    public static string Write(string? ns, string accessibility, string name, string type, string atomType)
     {
-        public static string Write(string? ns, string accessibility, string name, string type, string atomType)
-        {
-            return $$"""
+        return $$"""
 {{Constants.SharedCodeHeader}}
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -37,6 +37,5 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 """;
 
 
-        }
     }
 }

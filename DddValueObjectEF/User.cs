@@ -28,7 +28,9 @@ namespace DddValueObjectEF
     }
 
     // 個別に StronglyTypedValue を確認して EfValueConverter を定義する場合
-    [StronglyTypedValue(typeof(string), EfValueConverter = true, EfValueConverterNamespace = "DddValueObjectEF.Infra")]
+    [StronglyTypedValue(typeof(string), 
+        EfValueConverter = true, EfValueConverterNamespace = "DddValueObjectEF.Infra",
+        JsonConverter = true, JsonConverterNamespace = "DddValueObjectEF.Infra")]
     public readonly partial struct Email
     {
         static partial void Validate(string value, List<string> messages)
@@ -50,7 +52,12 @@ namespace DddValueObjectEF
     {
     }
 
-    [StronglyTypedValue(typeof(string), EfValueConverter = true)]
+    [StronglyTypedValueJsonConverter(typeof(UserId))]
+    partial class UserIdJsonConverter
+    {
+    }
+
+    [StronglyTypedValue(typeof(string), EfValueConverter = true, JsonConverter = true)]
     public readonly partial struct UserName
     {
     }
@@ -61,8 +68,8 @@ namespace DddValueObjectEF
     
     }
 
-
-    [StronglyTypedValue(typeof(int), EfValueConverter = true, EfValueConverterNamespace = nameof(DddValueObjectEF) + ".Infra")]
+    [StronglyTypedValue(typeof(int), EfValueConverter = true, EfValueConverterNamespace = nameof(DddValueObjectEF) + ".Infra",
+        JsonConverter = true, JsonConverterNamespace = nameof(DddValueObjectEF) + ".Infra")]
     public readonly partial struct UserAge
     {
     }

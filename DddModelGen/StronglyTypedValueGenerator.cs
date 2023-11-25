@@ -14,9 +14,9 @@ public class StronglyTypedValueGenerator : IIncrementalGenerator
 
         var source = context.SyntaxProvider.ForAttributeWithMetadataName(
             $"{Constants.NamespaceName}.{Constants.MainAttributeClassName}",
-            static (node, token) => true, 
+            static (node, token) => true,
             static (context, token) => context);
-        
+
         context.RegisterSourceOutput(source, Emit);
     }
 
@@ -26,7 +26,7 @@ public class StronglyTypedValueGenerator : IIncrementalGenerator
         var typeSymbol = (INamedTypeSymbol)source.TargetSymbol;
 
         var (attrData, _) = Util.GetMainAttributeData(typeSymbol);
-        if(attrData is null) return;
+        if (attrData is null) return;
 
         var targetTypeSymbol = Util.GetTypeSymbolFromFirstArgument(attrData);
         if (targetTypeSymbol is null) return;
@@ -48,11 +48,12 @@ public class StronglyTypedValueGenerator : IIncrementalGenerator
         {
             $"IEqualityOperators<{typeSymbol.Name}, {targetTypeFullName}, bool>"
         };
-        if (!typeSymbol.IsRecord) {
+        if (!typeSymbol.IsRecord)
+        {
             implements.Add($"IEqualityOperators<{typeSymbol.Name}, {typeSymbol.Name}, bool>");
             implements.Add($"IEquatable<{typeSymbol.Name}>");
         }
-        if((CanComparisonType(targetTypeFullName)))
+        if ((CanComparisonType(targetTypeFullName)))
         {
             implements.Add($"IComparisonOperators<{typeSymbol.Name}, {targetTypeFullName}, bool>");
             implements.Add($"IComparisonOperators<{typeSymbol.Name}, {typeSymbol.Name}, bool>");
@@ -66,7 +67,7 @@ using System.Numerics;
 {{(string.IsNullOrWhiteSpace(ns) ? "" : "namespace " + ns + ";")}}
 
 [System.ComponentModel.TypeConverter(typeof({{typeSymbol.Name}}TypeConverter))]
-partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{ string.Join(", ", implements) }} 
+partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{string.Join(", ", implements)}} 
 {
     private readonly {{targetTypeFullName}} _value;
 
@@ -181,10 +182,25 @@ partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{ strin
             var efConverterCode = EfValueConverterWriter.Write(
                 efConverterNamespace,
                 Util.GetCSharpAccesibilityString(typeSymbol.DeclaredAccessibility),
-                efConverterName, 
+                efConverterName,
                 typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 targetTypeFullName);
             context.AddSource(Util.CreateFileName(typeSymbol, "EfValueConverter"), efConverterCode);
+        }
+
+        var createJsonConverter = attrData.NamedArguments.Where(d => d.Key == "JsonConverter").FirstOrDefault().Value.Value as bool? ?? false;
+        var jsonConverterNamespace = attrData.NamedArguments.Where(d => d.Key == "JsonConverterNamespace").FirstOrDefault().Value.Value as string ?? ns;
+
+        if (createJsonConverter)
+        {
+            var jsonConverterName = $"{typeSymbol.Name}JsonConverter";
+            var jsonConverterCode = JsonConverterWriter.Write(
+                jsonConverterNamespace,
+                Util.GetCSharpAccesibilityString(typeSymbol.DeclaredAccessibility),
+                jsonConverterName,
+                typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                targetTypeFullName);
+            context.AddSource(Util.CreateFileName(typeSymbol, "JsonConverter"), jsonConverterCode);
         }
     }
 
@@ -231,7 +247,7 @@ partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{ strin
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string GetNullCheckCode(INamedTypeSymbol typeSymbol) 
+    private static string GetNullCheckCode(INamedTypeSymbol typeSymbol)
         => typeSymbol.IsReferenceType ? "if (value is null) throw new ArgumentNullException(nameof(value));" : "";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,7 +283,7 @@ partial {{GetTypeKindDescriptionText(typeSymbol)}} {{typeSymbol.Name}}: {{ strin
             "System.TimeOnly" => true,
             _ => false,
         };
-        
+
     }
 
     private static bool CanComparisonType(string targetTypeFullName)

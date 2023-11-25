@@ -1,10 +1,10 @@
-﻿namespace DddModelGen.Codes
+﻿namespace DddModelGen.Codes;
+
+internal static class MainAttributeWriter
 {
-    internal static class MainAttributeWriter
+    public static string Write()
     {
-        public static string Write()
-        {
-            return $$"""
+        return $$"""
 {{Constants.SharedCodeHeader}}
 
 using System;
@@ -24,8 +24,11 @@ internal sealed class {{Constants.MainAttributeClassName}} : Attribute
     public bool EfValueConverter { get; set; } = false;
 
     public string? EfValueConverterNamespace { get; set; } = null;
+
+    public bool JsonConverter { get; set; } = false;
+
+    public string? JsonConverterNamespace { get; set; } = null;
 }
 """;
-        }
     }
 }

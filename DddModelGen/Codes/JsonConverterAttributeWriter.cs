@@ -1,6 +1,6 @@
 ﻿namespace DddModelGen.Codes;
 
-internal static class EfValueConverterAttributeWriter
+internal static class JsonConverterAttributeWriter
 {
     public static string Write()
     {
@@ -12,9 +12,9 @@ using System;
 namespace {{Constants.NamespaceName}};
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-internal sealed class {{Constants.EfConverterAttributeClassName}} : Attribute
+internal sealed class {{Constants.JsonConverterAttributeClassName}} : Attribute
 {
-    public {{Constants.EfConverterAttributeClassName}}(Type type)
+    public {{Constants.JsonConverterAttributeClassName}}(Type type)
     {
         Type = type;
     }
