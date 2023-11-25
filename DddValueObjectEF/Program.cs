@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using DddModels;
 using DddValueObjectEF;
 using Domain;
 using DotNet.Testcontainers.Containers;
@@ -19,7 +20,7 @@ try
     var dbContext = new SampleDbContext(options);
 
     dbContext.Database.EnsureCreated();
-
+        
     var user = User.Create(
         UserId.Create(Guid.NewGuid()),
         UserName.Create("John Doe"),
@@ -131,3 +132,9 @@ void Write(List<User> users) => users.ForEach(u => Console.WriteLine($"{u.Id} {u
 
 
 public record UserQueryResult(Guid id, string name, int age, string email, string? extAttr);
+
+[StronglyTypedValue(typeof(Guid))]
+public partial class TestId
+{
+
+}

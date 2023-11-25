@@ -4,10 +4,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 
-namespace DddModelGen;
+namespace DddModelGen.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class Analyzer : DiagnosticAnalyzer
+public class AvoidNewAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
         = ImmutableArray.Create(Descriptors.DoNotInitializeByDefaultConstructor);
@@ -23,7 +23,6 @@ public class Analyzer : DiagnosticAnalyzer
     {
         var objectCreationExpression = (ObjectCreationExpressionSyntax)context.Node;
 
-        // Check if it's a struct instantiation
         var typeSymbol = context.SemanticModel.GetTypeInfo(objectCreationExpression).Type as INamedTypeSymbol;
         if (typeSymbol == null || !typeSymbol.IsValueType)
         {
@@ -34,7 +33,7 @@ public class Analyzer : DiagnosticAnalyzer
         var hasStronglyTypedValueAttribute = typeSymbol.GetAttributes().Any(attr => attr.AttributeClass?.ContainingNamespace.Name == "DddModels" && attr.AttributeClass?.Name == "StronglyTypedValueAttribute");
         if (!hasStronglyTypedValueAttribute) return;
         var argCount = objectCreationExpression.ArgumentList?.Arguments.Count ?? 0;
-        if(argCount > 0) return;
+        if (argCount > 0) return;
 
         var diagnostic = Diagnostic.Create(Descriptors.DoNotInitializeByDefaultConstructor, objectCreationExpression.GetLocation(), typeSymbol.Name);
         context.ReportDiagnostic(diagnostic);

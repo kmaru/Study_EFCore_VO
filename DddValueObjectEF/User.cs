@@ -46,7 +46,7 @@ namespace DddValueObjectEF
 
     // 個別に StronglyTypedValue を確認して EfValueConverter を定義する場合
     [StronglyTypedValueEfConverter(typeof(UserId))]
-    public partial class UserIdEfValueConverter
+    partial class UserIdEfValueConverter
     {
     }
 
@@ -54,6 +54,13 @@ namespace DddValueObjectEF
     public readonly partial struct UserName
     {
     }
+
+    [StronglyTypedValue(typeof(DateTimeOffset), EfValueConverter = true)]
+    public readonly partial struct BirthDate 
+    { 
+    
+    }
+
 
     [StronglyTypedValue(typeof(int), EfValueConverter = true, EfValueConverterNamespace = nameof(DddValueObjectEF) + ".Infra")]
     public readonly partial struct UserAge
@@ -121,4 +128,6 @@ namespace DddValueObjectEF
     //    }
     //}
 
+    [StronglyTypedValue(typeof(DateTime), EfValueConverter = true)]
+    public partial record OrderDate { }
 }

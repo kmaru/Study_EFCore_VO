@@ -1,5 +1,7 @@
 ﻿using Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using DddValueObjectEF.Infra;
 
 namespace DddValueObjectEF
 {
@@ -39,16 +41,16 @@ namespace DddValueObjectEF
         {
             configurationBuilder
                 .Properties<UserId>()
-                .HaveConversion<UserIdEfValueConverter>();
+                .HaveStronglyTypedValueConversion();
             configurationBuilder
                 .Properties<UserName>()
-                .HaveConversion<UserNameEfValueConverter>();
+                .HaveStronglyTypedValueConversion();
             configurationBuilder
                 .Properties<UserAge>()
-                .HaveConversion<Infra.UserAgeEfValueConverter>();
+                .HaveStronglyTypedValueConversion();
             configurationBuilder
                 .Properties<Email>()
-                .HaveConversion<Infra.EmailEfValueConverter>();
+                .HaveStronglyTypedValueConversion();
         }
     }
 }
